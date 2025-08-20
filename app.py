@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, s
 import json
 import os
 import psycopg
-from psycopg import pool
 from psycopg.rows import dict_row
 from datetime import datetime, timedelta
 import requests
@@ -49,30 +48,14 @@ app = Flask(__name__)
 class PostgreSQLDB:
     def __init__(self, database_url=DATABASE_URL):
         self.database_url = database_url
-        self.connection_pool = None
-        self.init_connection_pool()
         self.init_database()
-    
-    def init_connection_pool(self):
-        """Initialize PostgreSQL connection pool using psycopg"""
-        try:
-            self.connection_pool = psycopg.pool.ConnectionPool(
-                self.database_url,
-                min_size=1,
-                max_size=20,
-                kwargs={"row_factory": dict_row}
-            )
-            logger.info("✅ PostgreSQL connection pool initialized")
-        except Exception as e:
-            logger.error(f"❌ Failed to initialize connection pool: {e}")
-            raise
     
     @contextmanager
     def get_connection(self):
         """Context manager for database connections"""
         conn = None
         try:
-            conn = self.connection_pool.getconn()
+            conn = psycopg.connect(self.database_url, row_factory=dict_row)
             yield conn
         except Exception as e:
             if conn:
@@ -81,7 +64,7 @@ class PostgreSQLDB:
             raise
         finally:
             if conn:
-                self.connection_pool.putconn(conn)
+                conn.close()
     
     def init_database(self):
         """Initialize the database with required tables"""

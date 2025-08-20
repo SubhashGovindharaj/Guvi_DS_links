@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUVI Data Science Link Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'guvi': {
+                            'orange': '#FF6B35',
+                            'blue': '#1E40AF',
+                            'dark': '#1F2937',
+                            'light': '#F8FAFC',
+                            'green': '#10B981',
+                            'purple': '#8B5CF6'
+                        }
+                    },
+                    fontFamily: {
+                        'guvi': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --guvi-orange: #FF6B35;
+            --guvi-blue: #1E40AF;
+            --guvi-dark: #1F2937;
+            --guvi-light: #F8FAFC;
+            --guvi-green: #10B981;
+            --guvi-purple: #8B5CF6;
+        }
+
+        * {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--guvi-orange), #e55a2b);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #e55a2b, #d14d21);
+        }
+
+        /* GUVI Branding */
+        .guvi-gradient {
+            background: linear-gradient(135deg, var(--guvi-orange) 0%, #e55a2b 100%);
+        }
+
+        .guvi-gradient-blue {
+            background: linear-gradient(135deg, var(--guvi-blue) 0%, #1d4ed8 100%);
+        }
+
+        .guvi-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Search enhancements */
+        .search-container {
+            position: relative;
+        }
+
+        .search-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--guvi-orange), var(--guvi-blue));
+            border-radius: 50px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .search-container:focus-within::before {
+            opacity: 1;
+        }
+
+        #searchInput {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+        }
+
+        #searchInput:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(255, 107, 53, 0.3);
+            border-color: var(--guvi-orange);
+        }
+
+        /* Link card hover effects */
+        .link-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .link-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Category filters */
+        .category-filter {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .category-filter::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .category-filter:hover::before {
+            left: 100%;
+        }
+
+        .category-filter.active {
+            background: linear-gradient(135deg, var(--guvi-orange), #e55a2b);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        /* Chat interface */
+        .chat-message {
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-bubble {
+            position: relative;
+        }
+
+        .chat-bubble::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        .chat-bubble.user::before {
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 8px solid transparent;
+            border-left-color: var(--guvi-orange);
+        }
+
+        .chat-bubble.ai::before {
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 8px solid transparent;
+            border-right-color: #f1f5f9;
+        }
+
+        /* Stats cards */
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            animation: countUp 1.5s ease-out;
+            background: linear-gradient(135deg, var(--guvi-orange), var(--guvi-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @keyframes countUp {
+            from { 
+                transform: scale(0.8); 
+                opacity: 0; 
+            }
+            to { 
+                transform: scale(1); 
+                opacity: 1; 
+            }
+        }
+
+        /* Notifications */
+        .notification {
+            animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        /* Modal enhancements */
+        .modal-backdrop {
+            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-content {
+            animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* GUVI Logo styling */
+        .guvi-logo {
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .guvi-logo:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 4px 8px rgba(255, 107, 53, 0.3));
+        }
+
+        /* Improved buttons */
+        .guvi-btn {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--guvi-orange), #e55a2b);
+        }
+
+        .guvi-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .guvi-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Loading states */
+        .thinking-dots::after {
+            content: '';
+            animation: thinking 1.4s infinite;
+        }
+
+        @keyframes thinking {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .link-card:hover {
+                transform: none;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+            
+            #searchInput {
+                font-size: 16px;
+            }
+            
+            .stat-card {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Accessibility improvements */
+        .focus-visible {
+            outline: 2px solid var(--guvi-orange);
+            outline-offset: 2px;
+        }
+
+        /* Search results styling */
+        #searchResults {
+            animation: fadeIn 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Empty state styling */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-200 min-h-screen">
+    <!-- Notifications Container -->
+    <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Header -->
+    <header class="guvi-card sticky top-0 z-40 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-6">
+                    <!-- GUVI Logo -->
+                    <div class="flex items-center space-x-3">
+                        <div class="h-12 w-12 guvi-gradient rounded-xl flex items-center justify-center shadow-lg">
+                            <span class="text-white font-bold text-2xl">G</span>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold bg-gradient-to-r from-guvi-orange to-guvi-blue bg-clip-text text-transparent">
+                                GUVI Link Hub
+                            </h1>
+                            <p class="text-sm text-gray-600 font-medium">Data Science Team Resources</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="statsBtn" class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-guvi-orange hover:bg-orange-50 rounded-lg transition-all">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="hidden sm:inline font-medium">Analytics</span>
+                    </button>
+                    <button id="importBtn" class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-guvi-blue hover:bg-blue-50 rounded-lg transition-all">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span class="hidden sm:inline font-medium">Import</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Search Section -->
+        <div class="mb-10">
+            <div class="relative max-w-3xl mx-auto">
+                <div class="search-container relative">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search links, ask AI anything... (Ctrl+K for quick search)"
+                        class="w-full px-8 py-5 text-lg bg-white/90 backdrop-blur-sm border-2 border-transparent rounded-full shadow-xl focus:outline-none transition-all placeholder-gray-500"
+                    >
+                    <div class="absolute right-6 top-1/2 transform -translate-y-1/2 flex items-center space-x-3">
+                        <button id="searchBtn" class="text-gray-400 hover:text-guvi-orange transition-colors">
+                            <i class="fas fa-search text-xl"></i>
+                        </button>
+                        <div class="w-px h-6 bg-gray-300"></div>
+                        <button id="aiChatToggle" class="text-gray-400 hover:text-guvi-orange transition-colors">
+                            <i class="fas fa-robot text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="searchResults" class="hidden absolute top-full mt-3 w-full rounded-2xl shadow-2xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
+                </div>
+            </div>
+
+            <!-- Mode Toggle -->
+            <div class="flex justify-center mt-6">
+                <div class="flex bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-lg border border-gray-200">
+                    <button id="searchMode" class="px-6 py-3 rounded-full text-sm font-semibold guvi-gradient text-white shadow-md">
+                        <i class="fas fa-search mr-2"></i> Search Mode
+                    </button>
+                    <button id="chatMode" class="px-6 py-3 rounded-full text-sm font-semibold text-gray-600 hover:text-guvi-dark transition-colors">
+                        <i class="fas fa-comments mr-2"></i> AI Chat
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Interface -->
+        <div id="chatInterface" class="hidden mb-10 max-w-3xl mx-auto">
+            <div class="guvi-card rounded-2xl shadow-xl border border-gray-200">
+                <div class="guvi-gradient text-white p-6 rounded-t-2xl">
+                    <h3 class="font-bold text-lg flex items-center">
+                        <i class="fas fa-robot mr-3 text-xl"></i>
+                        GUVI AI Assistant
+                        <span class="ml-3 px-3 py-1 bg-white/20 rounded-full text-sm font-medium">Beta</span>
+                    </h3>
+                    <p class="mt-2 text-orange-100">Ask me anything about your data science resources!</p>
+                </div>
+                <div id="chatMessages" class="h-80 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 guvi-gradient rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <div class="chat-bubble ai bg-gray-100 rounded-2xl p-4 max-w-md shadow-sm">
+                            <p class="text-gray-800">Hello! I'm your GUVI AI assistant. I can help you find resources about machine learning, data science, datasets, and more. What are you looking for today?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t border-gray-200">
+                    <div class="flex space-x-3">
+                        <input 
+                            type="text" 
+                            id="chatInput" 
+                            placeholder="Ask about ML resources, datasets, tools..."
+                            class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:border-guvi-orange focus:outline-none focus:ring-2 focus:ring-guvi-orange/20 transition-all"
+                        >
+                        <button id="sendChatBtn" class="guvi-btn px-6 py-3 text-white rounded-xl hover:shadow-lg transition-all">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Bar -->
+        <div id="statsBar" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+            <div class="stat-card rounded-2xl p-6 text-center shadow-lg border border-gray-200">
+                <div class="stat-number text-3xl font-bold mb-2" id="totalLinks">0</div>
+                <div class="text-sm text-gray-600 font-medium">Total Resources</div>
+                <div class="w-12 h-1 guvi-gradient rounded-full mx-auto mt-3"></div>
+            </div>
+            <div class="stat-card rounded-2xl p-6 text-center shadow-lg border border-gray-200">
+                <div class="stat-number text-3xl font-bold mb-2 text-guvi-green" id="weeklyLinks">0</div>
+                <div class="text-sm text-gray-600 font-medium">Added This Week</div>
+                <div class="w-12 h-1 bg-guvi-green rounded-full mx-auto mt-3"></div>
+            </div>
+            <div class="stat-card rounded-2xl p-6 text-center shadow-lg border border-gray-200">
+                <div class="stat-number text-3xl font-bold mb-2 text-guvi-blue" id="categoryCount">6</div>
+                <div class="text-sm text-gray-600 font-medium">Categories</div>
+                <div class="w-12 h-1 bg-guvi-blue rounded-full mx-auto mt-3"></div>
+            </div>
+            <div class="stat-card rounded-2xl p-6 text-center shadow-lg border border-gray-200">
+                <div class="stat-number text-3xl font-bold mb-2 text-guvi-purple" id="topCategory">-</div>
+                <div class="text-sm text-gray-600 font-medium">Top Category</div>
+                <div class="w-12 h-1 bg-guvi-purple rounded-full mx-auto mt-3"></div>
+            </div>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Browse by Category</h3>
+            <div class="flex flex-wrap gap-3">
+                <button class="category-filter active px-6 py-3 rounded-full text-sm font-semibold guvi-gradient text-white shadow-lg" data-category="all">
+                    <i class="fas fa-globe mr-2"></i>All Resources
+                </button>
+                <button class="category-filter px-6 py-3 rounded-full text-sm font-semibold bg-white text-gray-700 hover:bg-gray-50 shadow-md border border-gray-200" data-category="machine-learning">
+                    <i class="fas fa-brain mr-2"></i>Machine Learning
+                </button>
+                <button class="category-filter px-6 py-3 rounded-full text-sm font-semibold bg-white text-gray-700 hover:bg-gray-50 shadow-md border border-gray-200" data-category="data-science">
+                    <i class="fas fa-chart-bar mr-2"></i>Data Science
+                </button>
+                <button class="category-filter px-6 py-3 rounded-full text-sm font-semibold bg-white text-gray-700 hover:bg-gray-50 shadow-md border border-gray-200" data-category="deep-learning">
+                    <i class="fas fa-network-wired mr-2"></i>Deep Learning
+                </button>
+                <button class="category-filter px-6 py-3 rounded-full text-sm font-semibold bg-white text-gray-700 hover:bg-gray-50 shadow-md border border-gray-200" data-category="tools">
+                    <i class="fas fa-tools mr-2"></i>Tools
+                </button>
+                <button class="category-filter px-6 py-3 rounded-full text-sm font-semibold bg-white text-gray-700 hover:bg-gray-50 shadow-md border border-gray-200" data-category="datasets">
+                    <i class="fas fa-database mr-2"></i>Datasets
+                </button>
+            </div>
+        </div>
+
+        <!-- Add Link Button -->
+        <div class="mb-8">
+            <button id="addLinkBtn" class="guvi-btn text-white px-8 py-4 rounded-xl font-semibold shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1">
+                <i class="fas fa-plus mr-3"></i>
+                Add New Resource
+            </button>
+        </div>
+
+        <!-- Links Grid -->
+        <div id="linksGrid" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <!-- Links will be loaded here -->
+        </div>
+    </main>
+
+    <!-- Add Link Modal -->
+    <div id="addLinkModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4">
+        <div class="modal-content guvi-card rounded-2xl p-8 w-full max-w-lg shadow-2xl">
+            <h3 class="text-2xl font-bold mb-6 text-gray-800">Add New Resource</h3>
+            <form id="addLinkForm">
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Resource Title</label>
+                        <input type="text" name="title" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-guvi-orange focus:outline-none focus:ring-2 focus:ring-guvi-orange/20 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">URL</label>
+                        <input type="url" name="url" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-guvi-orange focus:outline-none focus:ring-2 focus:ring-guvi-orange/20 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                        <textarea name="description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-guvi-orange focus:outline-none focus:ring-2 focus:ring-guvi-orange/20 transition-all resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                        <select name="category" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-guvi-orange focus:outline-none focus:ring-2 focus:ring-guvi-orange/20 transition-all">
+                            <option value="machine-learning">Machine Learning</option>
+                            <option value="data-science">Data Science</option>
+                            <option value="deep-learning">Deep Learning</option>
+                            <option value="tools">Tools</option>
+                            <option value="datasets">Datasets</option>
+                            <option value="documentation">Documentation</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Name</label>
+                        <input type="text" name="added_by" placeholder="Your name" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-guvi-orange focus:outline-none focus:ring-2 focus:ring-guvi-orange/20 transition-all">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 mt-8">
+                    <button type="button" id="cancelAddLink" class="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors">Cancel</button>
+                    <button type="submit" class="guvi-btn px-8 py-3 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
+                        <i class="fas fa-plus mr-2"></i>Add Resource
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4">
+        <div class="modal-content guvi-card rounded-2xl p-8 w-full max-w-3xl shadow-2xl">
+            <h3 class="text-2xl font-bold mb-6 text-gray-800">Import Resources from Text</h3>
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Paste your content with URLs here</label>
+                    <textarea id="importText" rows="10" placeholder="Copy and paste content that contains links from Google Docs, websites, etc..." class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-guvi-orange focus:outline-none focus:ring-2 focus:ring-guvi-orange/20 transition-all resize-none"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Category for imported resources</label>
+                        <select id="importCategory" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-guvi-orange focus:outline-none focus:ring-2 focus:ring-guvi-orange/20 transition-all">
+                            <option value="machine-learning">Machine Learning</option>
+                            <option value="data-science">Data Science</option>
+                            <option value="deep-learning">Deep Learning</option>
+                            <option value="tools">Tools</option>
+                            <option value="datasets">Datasets</option>
+                            <option value="documentation">Documentation</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Name</label>
+                        <input type="text" id="importAddedBy" placeholder="Your name" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-guvi-orange focus:outline-none focus:ring-2 focus:ring-guvi-orange/20 transition-all">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-4 mt-8">
+                <button type="button" id="cancelImport" class="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors">Cancel</button>
+                <button type="button" id="processImport" class="guvi-btn px-8 py-3 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
+                    <i class="fas fa-cloud-upload-alt mr-2"></i>Import Resources
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let isSearchMode = true;
+        let searchTimeout;
+        let chatHistory = [];
+        let allLinks = [];
+        let currentFilter = 'all';
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            loadInitialData();
+            initializeApp();
+        });
+
+        function initializeApp() {
+            showNotification('Welcome to GUVI Link Hub! Your team resource center.', 'success', 4000);
+        }
+
+        // Load initial data from backend
+        async function loadInitialData() {
+            try {
+                // Load links from backend
+                const response = await fetch('/search');
+                if (response.ok) {
+                    allLinks = await response.json();
+                    updateLinksDisplay();
+                    loadStats();
+                } else {
+                    throw new Error('Failed to load links');
+                }
+            } catch (error) {
+                console.error('Failed to load initial data:', error);
+                showNotification('Failed to load data from server', 'error');
+                allLinks = [];
+                updateLinksDisplay();
+            }
+        }
+
+        function setupEventListeners() {
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            
+            searchInput.addEventListener('input', handleSearch);
+            searchInput.addEventListener('focus', () => {
+                if (searchInput.value.trim()) {
+                    searchResults.classList.remove('hidden');
+                }
+            });
+            
+            // Mode switching
+            document.getElementById('searchMode').addEventListener('click', switchToSearchMode);
+            document.getElementById('chatMode').addEventListener('click', switchToChatMode);
+            document.getElementById('aiChatToggle').addEventListener('click', switchToChatMode);
+            
+            // Chat functionality
+            document.getElementById('sendChatBtn').addEventListener('click', sendChatMessage);
+            document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    sendChatMessage();
+                }
+            });
+            
+            // Modal controls
+            document.getElementById('addLinkBtn').addEventListener('click', openAddLinkModal);
+            document.getElementById('cancelAddLink').addEventListener('click', closeAddLinkModal);
+            document.getElementById('addLinkForm').addEventListener('submit', handleAddLink);
+            
+            // Import functionality
+            document.getElementById('importBtn').addEventListener('click', openImportModal);
+            document.getElementById('cancelImport').addEventListener('click', closeImportModal);
+            document.getElementById('processImport').addEventListener('click', handleImport);
+            
+            // Stats
+            document.getElementById('statsBtn').addEventListener('click', showDetailedStats);
+            
+            // Category filtering
+            document.querySelectorAll('.category-filter').forEach(btn => {
+                btn.addEventListener('click', handleCategoryFilter);
+            });
+            
+            // Link interactions
+            document.addEventListener('click', handleLinkClick);
+            
+            // Outside click to close search results
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.add('hidden');
+                }
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                    searchInput.select();
+                }
+                if (e.key === 'Escape') {
+                    closeAllModals();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !isSearchMode) {
+                    sendChatMessage();
+                }
+            });
+        }
+
+        // Search functionality
+        function handleSearch(e) {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+            
+            if (!query) {
+                document.getElementById('searchResults').classList.add('hidden');
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                if (isSearchMode) {
+                    performSearch(query);
+                }
+            }, 300);
+        }
+
+        async function performSearch(query) {
+            try {
+                const response = await fetch(`/search?q=${encodeURIComponent(query)}&category=${currentFilter !== 'all' ? currentFilter : ''}`);
+                if (response.ok) {
+                    const results = await response.json();
+                    displaySearchResults(results, query);
+                } else {
+                    throw new Error('Search failed');
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                showNotification('Search failed. Please try again.', 'error');
+            }
+        }
+
+        function displaySearchResults(links, query) {
+            const searchResults = document.getElementById('searchResults');
+            
+            if (links.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="p-6 text-center text-gray-500">
+                        <i class="fas fa-search-minus text-3xl mb-3 text-gray-400"></i>
+                        <p class="font-medium">No resources found for "${query}"</p>
+                        <p class="text-sm mt-1">Try different keywords or add a new resource</p>
+                    </div>
+                `;
+            } else {
+                searchResults.innerHTML = `
+                    <div class="p-4 bg-gray-50 border-b">
+                        <p class="text-sm text-gray-600">
+                            <i class="fas fa-search mr-2"></i>
+                            Found ${links.length} resource${links.length !== 1 ? 's' : ''} for "${query}"
+                        </p>
+                    </div>
+                    ${links.map(link => `
+                        <div class="p-4 hover:bg-orange-50 border-b last:border-b-0 cursor-pointer transition-colors" onclick="openLink('${link.url}', ${link.id})">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-900 mb-1">${link.title}</h4>
+                                    <p class="text-sm text-gray-600 mb-2 line-clamp-2">${link.description || 'No description available'}</p>
+                                    <div class="flex items-center space-x-4">
+                                        <span class="inline-flex items-center text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full font-medium">
+                                            ${getCategoryIcon(link.category)} ${formatCategoryName(link.category)}
+                                        </span>
+                                        <span class="text-xs text-gray-500">
+                                            <i class="fas fa-mouse-pointer mr-1"></i>${link.clicks || 0} clicks
+                                        </span>
+                                        <span class="text-xs text-gray-500">
+                                            <i class="fas fa-user mr-1"></i>${link.added_by || 'Anonymous'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-external-link-alt text-guvi-orange ml-3"></i>
+                            </div>
+                        </div>
+                    `).join('')}
+                `;
+            }
+            searchResults.classList.remove('hidden');
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                'machine-learning': '<i class="fas fa-brain mr-1"></i>',
+                'data-science': '<i class="fas fa-chart-bar mr-1"></i>',
+                'deep-learning': '<i class="fas fa-network-wired mr-1"></i>',
+                'tools': '<i class="fas fa-tools mr-1"></i>',
+                'datasets': '<i class="fas fa-database mr-1"></i>',
+                'documentation': '<i class="fas fa-file-alt mr-1"></i>'
+            };
+            return icons[category] || '<i class="fas fa-folder mr-1"></i>';
+        }
+
+        function formatCategoryName(category) {
+            return category.split('-').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        }
+
+        // Mode switching
+        function switchToSearchMode() {
+            isSearchMode = true;
+            
+            document.getElementById('searchMode').classList.add('guvi-gradient', 'text-white', 'shadow-md');
+            document.getElementById('searchMode').classList.remove('text-gray-600');
+            document.getElementById('chatMode').classList.remove('guvi-gradient', 'text-white', 'shadow-md');
+            document.getElementById('chatMode').classList.add('text-gray-600');
+            
+            document.getElementById('chatInterface').classList.add('hidden');
+            document.getElementById('searchInput').placeholder = "Search links, ask AI anything... (Ctrl+K for quick search)";
+            
+            showNotification('Switched to Search Mode', 'info', 2000);
+        }
+
+        function switchToChatMode() {
+            isSearchMode = false;
+            
+            document.getElementById('chatMode').classList.add('guvi-gradient', 'text-white', 'shadow-md');
+            document.getElementById('chatMode').classList.remove('text-gray-600');
+            document.getElementById('searchMode').classList.remove('guvi-gradient', 'text-white', 'shadow-md');
+            document.getElementById('searchMode').classList.add('text-gray-600');
+            
+            document.getElementById('chatInterface').classList.remove('hidden');
+            document.getElementById('searchResults').classList.add('hidden');
+            document.getElementById('searchInput').placeholder = "Ask AI about resources... (e.g., 'Show me machine learning resources')";
+            
+            // Focus on chat input
+            setTimeout(() => {
+                document.getElementById('chatInput').focus();
+            }, 300);
+            
+            showNotification('Switched to AI Chat Mode', 'info', 2000);
+        }
+
+        // Chat functionality
+        async function sendChatMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addChatMessage(message, 'user');
+            chatHistory.push({role: 'user', content: message});
+            chatInput.value = '';
+
+            // Add thinking indicator
+            const thinkingId = addChatMessage('', 'ai', true, true);
+
+            try {
+                // Send to backend AI chat endpoint
+                const response = await fetch('/ai_chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        history: chatHistory
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Remove thinking indicator
+                    document.getElementById(thinkingId)?.remove();
+                    
+                    // Add AI response
+                    addChatMessage(data.response, 'ai');
+                    chatHistory.push({role: 'ai', content: data.response});
+
+                    // Show relevant links if any
+                    if (data.relevant_links && data.relevant_links.length > 0) {
+                        addChatLinks(data.relevant_links);
+                    }
+                } else {
+                    throw new Error('AI chat request failed');
+                }
+            } catch (error) {
+                console.error('AI chat error:', error);
+                document.getElementById(thinkingId)?.remove();
+                addChatMessage('Sorry, I\'m having trouble connecting. Please try again later.', 'ai');
+                showNotification('AI chat failed. Please try again.', 'error');
+            }
+        }
+
+        function addChatMessage(message, sender, isTemporary = false, isThinking = false) {
+            const messageId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            const isUser = sender === 'user';
+            const chatMessages = document.getElementById('chatMessages');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.id = messageId;
+            messageDiv.className = `flex items-start space-x-3 chat-message ${isUser ? 'justify-end' : ''}`;
+            
+            if (isThinking) {
+                messageDiv.innerHTML = `
+                    <div class="w-10 h-10 guvi-gradient rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                        <i class="fas fa-robot text-white"></i>
+                    </div>
+                    <div class="chat-bubble ai bg-gray-100 rounded-2xl p-4 max-w-md shadow-sm">
+                        <div class="flex items-center space-x-2">
+                            <div class="thinking-dots">
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-guvi-orange rounded-full animate-bounce"></div>
+                                    <div class="w-2 h-2 bg-guvi-orange rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                    <div class="w-2 h-2 bg-guvi-orange rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                </div>
+                            </div>
+                            <span class="text-sm text-gray-600">Thinking...</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    ${!isUser ? `
+                        <div class="w-10 h-10 guvi-gradient rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                    ` : ''}
+                    <div class="chat-bubble ${isUser ? 'user' : 'ai'} ${
+                        isUser ? 'guvi-gradient text-white' : 'bg-gray-100 text-gray-800'
+                    } rounded-2xl p-4 max-w-md shadow-sm">
+                        <p class="text-sm leading-relaxed">${message}</p>
+                    </div>
+                    ${isUser ? `
+                        <div class="w-10 h-10 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-user text-gray-600"></i>
+                        </div>
+                    ` : ''}
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return messageId;
+        }
+
+        function addChatLinks(links) {
+            if (links.length === 0) return;
+            
+            const chatMessages = document.getElementById('chatMessages');
+            const linksDiv = document.createElement('div');
+            linksDiv.className = 'flex items-start space-x-3 chat-message';
+            
+            linksDiv.innerHTML = `
+                <div class="w-10 h-10 guvi-gradient rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fas fa-link text-white"></i>
+                </div>
+                <div class="max-w-md">
+                    <div class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-star text-guvi-orange mr-2"></i>
+                        Relevant Resources
+                    </div>
+                    <div class="space-y-3">
+                        ${links.map(link => `
+                            <div class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-1" onclick="openLink('${link.url}', ${link.id})">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-sm text-gray-900 mb-1">${link.title}</h4>
+                                        <p class="text-xs text-gray-600 mb-2 line-clamp-2">${link.description || 'No description available'}</p>
+                                        <div class="flex items-center justify-between">
+                                            <span class="inline-flex items-center text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full font-medium">
+                                                ${getCategoryIcon(link.category)} ${formatCategoryName(link.category)}
+                                            </span>
+                                            <span class="text-xs text-gray-500">
+                                                <i class="fas fa-mouse-pointer mr-1"></i>${link.clicks || 0}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-external-link-alt text-guvi-orange ml-3"></i>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(linksDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Link management
+        async function handleAddLink(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Adding...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/add_link', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Reload data from server
+                    await loadInitialData();
+                    
+                    showNotification('Resource added successfully!', 'success');
+                    closeAddLinkModal();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to add resource');
+                }
+            } catch (error) {
+                console.error('Add link error:', error);
+                showNotification(error.message || 'Failed to add resource', 'error');
+            } finally {
+                // Reset button
+                submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i>Add Resource';
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function handleImport() {
+            const content = document.getElementById('importText').value.trim();
+            const category = document.getElementById('importCategory').value;
+            const addedBy = document.getElementById('importAddedBy').value || 'Anonymous';
+            const importBtn = document.getElementById('processImport');
+
+            if (!content) {
+                showNotification('Please paste some content to import', 'error');
+                return;
+            }
+
+            // Show loading state
+            importBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Importing...';
+            importBtn.disabled = true;
+
+            try {
+                const response = await fetch('/import_from_text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: content,
+                        category: category,
+                        added_by: addedBy
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Reload data from server
+                    await loadInitialData();
+                    
+                    showNotification(result.message || `Successfully imported ${result.imported_count} resources!`, 'success');
+                    closeImportModal();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Import failed');
+                }
+            } catch (error) {
+                console.error('Import error:', error);
+                showNotification(error.message || 'Import failed', 'error');
+            } finally {
+                importBtn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-2"></i>Import Resources';
+                importBtn.disabled = false;
+            }
+        }
+
+        // Display functions
+        function updateLinksDisplay(filteredLinks = null) {
+            const linksGrid = document.getElementById('linksGrid');
+            const linksToShow = filteredLinks || allLinks;
+            
+            if (linksToShow.length === 0) {
+                linksGrid.innerHTML = `
+                    <div class="col-span-full">
+                        <div class="empty-state">
+                            <i class="fas fa-plus-circle"></i>
+                            <h3 class="text-xl font-semibold mb-2">No resources yet</h3>
+                            <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                                Start building your team's resource collection by adding your first link. 
+                                Share valuable datasets, tools, courses, and documentation!
+                            </p>
+                            <button onclick="document.getElementById('addLinkBtn').click()" 
+                                    class="guvi-btn text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
+                                <i class="fas fa-plus mr-2"></i>Add Your First Resource
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                linksGrid.innerHTML = linksToShow.map(link => createLinkCard(link)).join('');
+                
+                // Add scroll animations
+                setTimeout(() => {
+                    document.querySelectorAll('.link-card').forEach((card, index) => {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                        
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, index * 100);
+                    });
+                }, 50);
+            }
+        }
+
+        function createLinkCard(link) {
+            const timeAgo = getTimeAgo(link.created_at);
+            
+            return `
+                <div class="link-card rounded-2xl shadow-lg border border-gray-200 overflow-hidden" data-category="${link.category}">
+                    <div class="p-8">
+                        <div class="flex items-start justify-between mb-4">
+                            <h3 class="font-bold text-gray-900 flex-1 pr-4 text-lg">${link.title}</h3>
+                            <button class="delete-link text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg" data-id="${link.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        
+                        <p class="text-gray-600 mb-4 leading-relaxed">${link.description || 'No description available'}</p>
+                        
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="inline-flex items-center px-3 py-2 text-sm font-medium bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 rounded-full">
+                                ${getCategoryIcon(link.category)} ${formatCategoryName(link.category)}
+                            </span>
+                            <span class="text-sm text-gray-500 flex items-center">
+                                <i class="fas fa-mouse-pointer mr-2"></i>${link.clicks || 0}
+                            </span>
+                        </div>
+                        
+                        <a href="${link.url}" target="_blank" 
+                           class="inline-flex items-center guvi-gradient text-white font-semibold px-6 py-3 rounded-xl hover:shadow-lg transition-all transform hover:-translate-y-0.5 click-link"
+                           data-id="${link.id}">
+                            <i class="fas fa-external-link-alt mr-2"></i>
+                            Open Resource
+                        </a>
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-500 flex items-center justify-between">
+                            <span class="flex items-center">
+                                <i class="fas fa-user mr-2"></i>
+                                ${link.added_by}
+                            </span>
+                            <span class="flex items-center">
+                                <i class="fas fa-calendar mr-2"></i>
+                                ${timeAgo}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) return 'Today';
+            if (diffDays === 2) return 'Yesterday';
+            if (diffDays <= 7) return `${diffDays} days ago`;
+            if (diffDays <= 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+            return date.toLocaleDateString();
+        }
+
+        // Category filtering
+        async function handleCategoryFilter(e) {
+            const category = e.target.dataset.category;
+            currentFilter = category;
+
+            // Update active state
+            document.querySelectorAll('.category-filter').forEach(btn => {
+                btn.classList.remove('active', 'guvi-gradient', 'text-white', 'shadow-lg');
+                btn.classList.add('bg-white', 'text-gray-700', 'border-gray-200');
+            });
+
+            e.target.classList.add('active', 'guvi-gradient', 'text-white', 'shadow-lg');
+            e.target.classList.remove('bg-white', 'text-gray-700', 'border-gray-200');
+
+            try {
+                // Fetch filtered links from backend
+                const response = await fetch(`/search?category=${category !== 'all' ? category : ''}`);
+                if (response.ok) {
+                    const filteredLinks = await response.json();
+                    updateLinksDisplay(filteredLinks);
+                    
+                    // Show filter result
+                    const categoryName = category === 'all' ? 'All Resources' : e.target.textContent.trim();
+                    showNotification(`Showing ${filteredLinks.length} resource${filteredLinks.length !== 1 ? 's' : ''} in ${categoryName}`, 'info', 2000);
+                } else {
+                    throw new Error('Failed to filter links');
+                }
+            } catch (error) {
+                console.error('Filter error:', error);
+                showNotification('Failed to filter resources', 'error');
+            }
+        }
+
+        // Link interactions
+        function handleLinkClick(e) {
+            if (e.target.classList.contains('click-link') || e.target.closest('.click-link')) {
+                const linkElement = e.target.classList.contains('click-link') ? e.target : e.target.closest('.click-link');
+                const linkId = parseInt(linkElement.dataset.id);
+                trackLinkClick(linkId);
+                
+                // Add click animation
+                linkElement.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    linkElement.style.transform = 'scale(1)';
+                }, 150);
+                
+            } else if (e.target.classList.contains('delete-link') || e.target.closest('.delete-link')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const deleteElement = e.target.classList.contains('delete-link') ? e.target : e.target.closest('.delete-link');
+                const linkId = parseInt(deleteElement.dataset.id);
+                
+                if (confirm('Are you sure you want to delete this resource?\n\nThis action cannot be undone.')) {
+                    deleteLink(linkId);
+                }
+            }
+        }
+
+        async function trackLinkClick(linkId) {
+            try {
+                await fetch(`/click_link/${linkId}`, {
+                    method: 'POST'
+                });
+                // Reload stats
+                loadStats();
+            } catch (error) {
+                console.error('Click tracking error:', error);
+            }
+        }
+
+        async function deleteLink(linkId) {
+            try {
+                // Animate removal
+                const linkCard = document.querySelector(`[data-id="${linkId}"]`).closest('.link-card');
+                if (linkCard) {
+                    linkCard.style.transform = 'scale(0.8)';
+                    linkCard.style.opacity = '0';
+                }
+
+                const response = await fetch(`/delete_link/${linkId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    // Reload data from server
+                    await loadInitialData();
+                    showNotification('Resource deleted successfully', 'success');
+                } else {
+                    throw new Error('Failed to delete resource');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                showNotification('Failed to delete resource', 'error');
+                // Restore card if deletion failed
+                const linkCard = document.querySelector(`[data-id="${linkId}"]`)?.closest('.link-card');
+                if (linkCard) {
+                    linkCard.style.transform = '';
+                    linkCard.style.opacity = '';
+                }
+            }
+        }
+
+        function openLink(url, linkId) {
+            window.open(url, '_blank');
+            if (linkId) {
+                trackLinkClick(linkId);
+                showNotification('Opening resource...', 'info', 1500);
+            }
+        }
+
+        // Statistics
+        async function loadStats() {
+            try {
+                const response = await fetch('/stats');
+                if (response.ok) {
+                    const stats = await response.json();
+                    
+                    animateCounter('totalLinks', stats.total_links);
+                    animateCounter('weeklyLinks', stats.links_this_week);
+                    
+                    const categories = Object.keys(stats.category_distribution).length;
+                    document.getElementById('categoryCount').textContent = categories;
+                    document.getElementById('topCategory').textContent = formatCategoryName(stats.most_used_category) || '-';
+                } else {
+                    throw new Error('Failed to load stats');
+                }
+            } catch (error) {
+                console.error('Stats loading error:', error);
+                // Fallback to basic stats
+                document.getElementById('totalLinks').textContent = allLinks.length;
+                document.getElementById('weeklyLinks').textContent = '0';
+                document.getElementById('categoryCount').textContent = '6';
+                document.getElementById('topCategory').textContent = '-';
+            }
+        }
+
+        function animateCounter(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            const startValue = parseInt(element.textContent) || 0;
+            const duration = 1000;
+            const startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const currentValue = Math.floor(startValue + (targetValue - startValue) * progress);
+                element.textContent = currentValue;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+            
+            requestAnimationFrame(updateCounter);
+        }
+
+        async function showDetailedStats() {
+            try {
+                const response = await fetch('/stats');
+                if (response.ok) {
+                    const stats = await response.json();
+                    
+                    if (stats.total_links === 0) {
+                        showNotification('No statistics available yet. Add some resources to see analytics!', 'info', 4000);
+                        return;
+                    }
+
+                    let message = `<strong>Team Statistics</strong><br><br>`;
+                    message += `Total Resources: <strong>${stats.total_links}</strong><br>`;
+                    message += `Total Clicks: <strong>${stats.total_clicks || 0}</strong><br>`;
+                    message += `Added This Week: <strong>${stats.links_this_week}</strong><br><br>`;
+                    
+                    message += `<strong>Category Breakdown:</strong><br>`;
+                    Object.entries(stats.category_distribution || {})
+                        .sort(([,a], [,b]) => b - a)
+                        .forEach(([category, count]) => {
+                            message += `${getCategoryIcon(category)} ${formatCategoryName(category)}: ${count}<br>`;
+                        });
+                    
+                    showNotification(message, 'info', 8000);
+                } else {
+                    throw new Error('Failed to load detailed stats');
+                }
+            } catch (error) {
+                console.error('Detailed stats error:', error);
+                showNotification('Failed to load statistics', 'error');
+            }
+        }
+
+        // Modal controls
+        function openAddLinkModal() {
+            const modal = document.getElementById('addLinkModal');
+            modal.classList.remove('hidden');
+            
+            setTimeout(() => {
+                modal.querySelector('input[name="title"]').focus();
+            }, 300);
+        }
+
+        function closeAddLinkModal() {
+            const modal = document.getElementById('addLinkModal');
+            const content = modal.querySelector('.modal-content');
+            
+            content.style.transform = 'translateY(-20px) scale(0.95)';
+            content.style.opacity = '0';
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                content.style.transform = '';
+                content.style.opacity = '';
+                document.getElementById('addLinkForm').reset();
+            }, 300);
+        }
+
+        function openImportModal() {
+            const modal = document.getElementById('importModal');
+            modal.classList.remove('hidden');
+            
+            setTimeout(() => {
+                modal.querySelector('textarea').focus();
+            }, 300);
+        }
+
+        function closeImportModal() {
+            const modal = document.getElementById('importModal');
+            const content = modal.querySelector('.modal-content');
+            
+            content.style.transform = 'translateY(-20px) scale(0.95)';
+            content.style.opacity = '0';
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                content.style.transform = '';
+                content.style.opacity = '';
+                document.getElementById('importText').value = '';
+                document.getElementById('importAddedBy').value = '';
+            }, 300);
+        }
+
+        function closeAllModals() {
+            closeAddLinkModal();
+            closeImportModal();
+            document.getElementById('searchResults').classList.add('hidden');
+        }
+
+        // Notifications
+        function showNotification(message, type = 'info', duration = 3000) {
+            const notification = document.createElement('div');
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                info: 'fas fa-info-circle',
+                warning: 'fas fa-exclamation-triangle'
+            };
+            
+            const colors = {
+                success: 'from-green-500 to-green-600',
+                error: 'from-red-500 to-red-600',
+                info: 'from-blue-500 to-blue-600',
+                warning: 'from-yellow-500 to-yellow-600'
+            };
+
+            notification.className = `notification p-4 rounded-xl shadow-2xl text-white max-w-sm bg-gradient-to-r ${colors[type]} border border-white/20`;
+            notification.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div class="flex items-start space-x-3">
+                        <i class="${icons[type]} text-lg mt-0.5"></i>
+                        <div class="flex-1 text-sm leading-relaxed">${message}</div>
+                    </div>
+                    <button onclick="this.closest('.notification').remove()" class="ml-3 text-white/80 hover:text-white transition-colors">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('notifications').appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.transform = 'translateX(100%) scale(0.8)';
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, duration);
+        }
+
+        // Network status handling
+        window.addEventListener('online', () => {
+            showNotification('Back online! All features restored.', 'success', 3000);
+            loadInitialData(); // Reload data when back online
+        });
+
+        window.addEventListener('offline', () => {
+            showNotification('You\'re offline. Limited functionality available.', 'warning', 5000);
+        });
+
+        // Enhanced keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.altKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        switchToSearchMode();
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        switchToChatMode();
+                        break;
+                    case 'a':
+                        e.preventDefault();
+                        openAddLinkModal();
+                        break;
+                    case 'i':
+                        e.preventDefault();
+                        openImportModal();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        showDetailedStats();
+                        break;
+                }
+            }
+        });
+
+        // Error handling
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.error);
+            showNotification('Something went wrong. Please refresh the page.', 'error', 5000);
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            showNotification('Network error. Please check your connection.', 'error', 5000);
+        });
+
+        // Export functions for global access
+        window.openLink = openLink;
+        
+        console.log('GUVI Link Hub initialized successfully with SQLite backend!');
+    </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+{
+  "categories": {
+    "Data Science": {
+      "name": "Data Science",
+      "color": "blue"
+    },
+    "Machine Learning": {
+      "name": "Machine Learning",
+      "color": "green"
+    },
+    "Deep Learning": {
+      "name": "Deep Learning",
+      "color": "purple"
+    },
+    "Tools": {
+      "name": "Tools",
+      "color": "orange"
+    },
+    "Documentation": {
+      "name": "Documentation",
+      "color": "gray"
+    },
+    "Datasets": {
+      "name": "Datasets",
+      "color": "red"
+    }
+  },
+  "links": [
+    {
+      "id": 1,
+      "title": "Google ",
+      "url": "https://www.google.com",
+      "description": "A webiste about Google.",
+      "category": "Data Science",
+      "created_at": "2025-08-19T23:18:33.835476",
+      "clicks": 1,
+      "added_by": "Subhash"
+    }
+  ],
+  "stats": {
+    "total_links": 1,
+    "links_this_week": 1,
+    "most_used_category": "Data Science",
+    "team_activity": [
+      {
+        "action": "added_link",
+        "user": "Subhash",
+        "link_title": "Google ",
+        "timestamp": "2025-08-19T23:18:33.835501"
+      },
+      {
+        "action": "added_link",
+        "user": "Subhash",
+        "link_title": "Rapid API cricbuzz reference",
+        "timestamp": "2025-08-19T23:15:00.107741"
+      }
+    ]
+  }
+}

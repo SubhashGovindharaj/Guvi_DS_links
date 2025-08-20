@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
 import json
 import os
-import psycopg2
-from psycopg2 import pool
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg import pool
+from psycopg.rows import dict_row
 from datetime import datetime, timedelta
 import requests
 import re
@@ -21,12 +21,16 @@ load_dotenv()  # loads variables from .env
 
 # Environment variables
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-DATABASE_URL = os.getenv("DATABASE_URL")  # PostgreSQL connection string
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# For local development, you can use individual components
+# For Render, the DATABASE_URL is automatically provided
+# Internal: postgresql://guvi_ds_db_user:b8EehLOj2MYVDWFa7KysAPYGEClEYYxG@dpg-d2illpbuibrs739vjdpg-a/guvi_ds_db
+# External: postgresql://guvi_ds_db_user:b8EehLOj2MYVDWFa7KysAPYGEClEYYxG@dpg-d2illpbuibrs739vjdpg-a.oregon-postgres.render.com/guvi_ds_db
+
+# If DATABASE_URL is not set, fall back to local development
 if not DATABASE_URL:
     DB_HOST = os.getenv("DB_HOST", "localhost")
-    DB_PORT = os.getenv("DB_PORT", "5433")
+    DB_PORT = os.getenv("DB_PORT", "5432")
     DB_NAME = os.getenv("DB_NAME", "guvi_links")
     DB_USER = os.getenv("DB_USER", "postgres")
     DB_PASSWORD = os.getenv("DB_PASSWORD", "subhash")
@@ -50,11 +54,13 @@ class PostgreSQLDB:
         self.init_database()
     
     def init_connection_pool(self):
-        """Initialize PostgreSQL connection pool"""
+        """Initialize PostgreSQL connection pool using psycopg"""
         try:
-            self.connection_pool = psycopg2.pool.SimpleConnectionPool(
-                1, 20,  # min and max connections
-                self.database_url
+            self.connection_pool = psycopg.pool.ConnectionPool(
+                self.database_url,
+                min_size=1,
+                max_size=20,
+                kwargs={"row_factory": dict_row}
             )
             logger.info("✅ PostgreSQL connection pool initialized")
         except Exception as e:
@@ -182,7 +188,7 @@ def create_link(link_data):
     """Create a new link in PostgreSQL"""
     try:
         with db.get_connection() as conn:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor = conn.cursor()
             
             cursor.execute('''
                 INSERT INTO links (title, url, description, category, added_by, clicks, created_at, updated_at)
@@ -196,7 +202,7 @@ def create_link(link_data):
                 link_data.get('added_by', 'Anonymous')
             ))
             
-            link = dict(cursor.fetchone())
+            link = cursor.fetchone()
             conn.commit()
             
             # Add to activity log
@@ -218,7 +224,7 @@ def read_links(category=None, search_query=None, limit=None):
     """Read links from PostgreSQL with optional filtering"""
     try:
         with db.get_connection() as conn:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor = conn.cursor()
             
             query = "SELECT * FROM links WHERE 1=1"
             params = []
@@ -241,7 +247,7 @@ def read_links(category=None, search_query=None, limit=None):
                 params.append(limit)
             
             cursor.execute(query, params)
-            links = [dict(row) for row in cursor.fetchall()]
+            links = cursor.fetchall()
             
             return links
             
@@ -293,7 +299,7 @@ def delete_link(link_id):
     """Delete a link from PostgreSQL"""
     try:
         with db.get_connection() as conn:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor = conn.cursor()
             
             # Get link info before deletion
             cursor.execute("SELECT * FROM links WHERE id = %s", (link_id,))
@@ -350,7 +356,7 @@ def create_category(category_data):
         category_id = category_data['name'].lower().replace(' ', '-')
         
         with db.get_connection() as conn:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor = conn.cursor()
             
             cursor.execute('''
                 INSERT INTO categories (id, name, color) 
@@ -365,7 +371,7 @@ def create_category(category_data):
                 
             conn.commit()
             
-            return dict(result)
+            return result
             
     except Exception as e:
         logger.error(f"❌ Failed to create category: {e}")
@@ -375,7 +381,7 @@ def read_categories():
     """Read all categories"""
     try:
         with db.get_connection() as conn:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor = conn.cursor()
             cursor.execute("SELECT * FROM categories")
             
             categories = {}
@@ -414,7 +420,7 @@ def add_activity_log(activity_data):
             
             # Keep only last 100 activities
             cursor.execute("SELECT COUNT(*) FROM activity_log")
-            count = cursor.fetchone()[0]
+            count = cursor.fetchone()['count']
             
             if count > 100:
                 cursor.execute('''
@@ -434,14 +440,14 @@ def get_activity_log(limit=20):
     """Get recent activity log"""
     try:
         with db.get_connection() as conn:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor = conn.cursor()
             cursor.execute('''
                 SELECT * FROM activity_log 
                 ORDER BY timestamp DESC 
                 LIMIT %s
             ''', (limit,))
             
-            activities = [dict(row) for row in cursor.fetchall()]
+            activities = cursor.fetchall()
             return activities
             
     except Exception as e:
@@ -454,7 +460,7 @@ def get_statistics():
     """Get comprehensive statistics"""
     try:
         with db.get_connection() as conn:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor = conn.cursor()
             
             # Total links
             cursor.execute("SELECT COUNT(*) as count FROM links")
@@ -938,8 +944,8 @@ def bad_request(error):
     return jsonify({'error': 'Bad request'}), 400
 
 if __name__ == '__main__':
-    logger.info("🚀 Starting GUVI Link Hub with PostgreSQL...")
-    logger.info(f"📊 Database: PostgreSQL")
+    logger.info("🚀 Starting GUVI Link Hub with PostgreSQL on Render...")
+    logger.info(f"📊 Database: PostgreSQL (psycopg)")
     logger.info(f"🤖 Gemini AI: {'✅ Enabled' if GEMINI_API_KEY else '⚠️ Using fallback responses'}")
     
     # Check if templates directory exists
@@ -962,5 +968,5 @@ if __name__ == '__main__':
     else:
         logger.warning("⚠️ static/ directory not found")
     
-    port = int(os.environ.get('PORT', 5001))
+    port = int(os.environ.get('PORT', 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
